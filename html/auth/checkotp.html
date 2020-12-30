@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+     
+
+<title>check otp</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function(){
+        $("#btnLogin").click(function(){
+            $.post("/auth/api/CheckOTP",
+            {
+                OTP: $("#txtOTP").val() 
+            },
+            function(data,status){
+                alert(data.Status );
+                // setTimeout(function(){// wait for 5 secs(2)
+                //     location.reload(); // then reload the page.(3)
+                // }, 5000); 
+            }).fail(function(status) {
+                    alert( "error" +status );
+                });
+        });
+    });
+</script>
+</head>
+<body>
+<h1></h1>
+ 
+OTP:<input type="text" id="txtOTP"/><br/>
+ 
+<input type="button" id="btnLogin" value="login" />
+ 
+</body>
+</html>

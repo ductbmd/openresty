@@ -1,0 +1,49 @@
+worker_processes  1;
+#error_log /dev/stderr warn;
+
+events {
+    worker_connections 1024;
+}
+
+# make sure to set plaintext JWT_SECRET environment variable
+env JWT_SECRET;
+
+http {
+
+    
+
+    #lua_package_path "/lualib/?.lua;;";
+    # lua_package_path "/path/to/lua-resty-jwt/lib/?.lua;;";
+
+    server {
+         listen 8080;
+        default_type text/plain;
+        location = /verify {
+            content_by_lua '
+                local cjson = require "cjson"
+                local jwt = require "resty.jwt"
+
+                local jwt_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.12G95xiWMi6k-UG3CdvJA37KVPpIU0zb779wuYEOaoI"
+                local jwt_obj = jwt:verify("101b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b3727429090fb337591abd3e44453b954555b7a0812e1081c39b740293f765eae731f5a65ed1", jwt_token)
+                ngx.say(cjson.encode(jwt_obj))
+            ';
+        }
+        location = /sign {
+            content_by_lua '
+                local cjson = require "cjson"
+                local jwt = require "resty.jwt"
+
+                local jwt_token = jwt:sign(
+                    "101b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b3727429090fb337591abd3e44453b954555b7a0812e1081c39b740293f765eae731f5a65ed1",
+                    {
+                        header={typ="JWT", alg="HS256"},
+                        payload={foo="bar", nbf=1561273724,exp=1561277324,iat=1561273724}
+                    }
+                )
+                ngx.say(jwt_token)
+            ';
+        }
+    }
+
+
+}

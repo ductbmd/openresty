@@ -1,0 +1,8 @@
+/               =>Public
+/security/      =>Check role
+/api/           =>Public api
+
+/pages/         =>static pages
+/pages/auth/          =>https  require
+/pages/resources/         =>css, img...
+/pages/appxx/

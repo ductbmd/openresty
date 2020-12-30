@@ -1,0 +1,10 @@
+URL Path:
+/               =>Public
+/security/      =>Check role
+/api/           =>Public api
+/auth/          =>https  require
+/pages/         =>page,scrip,css...
+-----------------------------------
+Upstream:
++authAPI                =>Auth API (login, logout, otp, getmenus...)
++Backendxxxx            =>(BackendManager,BackendReport,...)

@@ -1,0 +1,90 @@
+worker_processes  1;
+#error_log /dev/stderr warn;
+
+events {
+    worker_connections 1024;
+}
+
+# make sure to set plaintext JWT_SECRET environment variable
+env JWT_SECRET;
+
+http {
+
+    upstream backend {
+                #  server localhost:5280 fail_timeout=5s;
+                 server 192.168.168.53:4400 fail_timeout=5s;
+                 #server  192.168.168.177:4400 fail_timeout=5s;
+                
+					}
+					
+	upstream backend_infoSky {
+                server localhost:4000 fail_timeout=5s;          
+					}
+	
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    include mime.types;
+      
+    fastcgi_read_timeout 300;
+    proxy_read_timeout 300;
+
+    server {
+        listen 8300;
+
+        location /index. {
+           return 301 /pages/v3$request_uri;
+        }
+        location /apis/ {
+            set $target ''; 
+            access_by_lua_file  conf/lua/routing.lua;
+            proxy_set_header    Host            $host;
+            echo http://backend/$target;
+            proxy_pass http://backend$target;
+        }
+        location /admin-api/Login/ {
+            proxy_pass http://backend/admin-api/Login/;
+            
+            set $rediscmd "";
+            set $rescontent "";
+            header_filter_by_lua '
+            ngx.header.content_length = nil
+            ngx.var.rediscmd=ngx.header.rediscmd
+            '; 
+        
+            body_filter_by_lua_file conf/lua/resbody.lua;
+ 
+            log_by_lua_file conf/lua/log.lua;
+    
+        }
+        location /admin-api/api/ {
+            proxy_set_header    Host            $host;
+            proxy_pass http://backend$request_uri;
+        }
+		
+		location /app/info_sky_v2/api/request {
+			client_max_body_size 200M;
+            proxy_pass http://backend_infoSky$request_uri;
+        }
+
+        location /app/info_sky_v2/process_status {
+            proxy_set_header    Host            $host;
+
+            proxy_pass http://backend_infoSky$request_uri;
+        }
+
+        location /funcs/ {
+			client_max_body_size 200M;
+            proxy_set_header    Host            $host;
+
+            # proxy_pass http://backend_infoSky$request_uri;
+            set $target ''; 
+            access_by_lua_file  conf/lua/routing_api.lua;
+            proxy_set_header    Host            $host;
+            echo http://backend/$target;
+            proxy_pass http://backend_infoSky$target;
+        }
+
+        
+    }
+}

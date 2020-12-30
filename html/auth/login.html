@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+     
+
+<title>Login</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function(){
+        $("#btnLogin").click(function(){
+            $.post("/auth/api/login",
+            {
+                UserName: $("#txtUser").val(),
+                PassWord: $("#txtPassword").val()
+            },
+            function(data,status){
+                
+                if(data.Status=='OTPPending');
+                    window.location.href = "checkotp.html";
+                // setTimeout(function(){// wait for 5 secs(2)
+                //     location.reload(); // then reload the page.(3)
+                // }, 5000); 
+            });
+        });
+    });
+</script>
+</head>
+<body>
+<h1>Login</h1>
+<form method="POST" action="/auth/api/login">
+User:<input type="text" id="txtUser"/><br/>
+Password:<input type="text" id="txtPassword"/><br/>
+<input type="button" id="btnLogin" value="login" />
+</form>
+</body>
+</html>
